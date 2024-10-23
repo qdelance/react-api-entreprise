@@ -62,28 +62,25 @@ function App() {
           address_line1 = address_line1.replace(address_line2, '');
 
           const isClosed = e.date_fermeture != null;
-          if (code != null && !(isClosed && ignoreClosedFilter)) {
+          const nom = e.nom_raison_sociale;
+
+          if (code !== null && nom !== null && !(isClosed && ignoreClosedFilter)) {
             tmp.push({
               type: 'principal',
+              code,
+              nom: e.nom_raison_sociale,
               nom_extra: 'Etablissement principal',
 
-              nom: e.nom_complet,
               date_fermeture: e.date_fermeture,
 
               est_association: e.complements?.est_association,
               est_entrepreneur_individuel: e.complements?.est_entrepreneur_individuel,
-
-              code,
 
               adresse_ligne1: address_line1,
               adresse_ligne2: address_line2,
             })
 
             if (e.matching_etablissements) {
-              // Les établissements secondaires n'ont pas de nom
-              // On reprend celui de l'établissement principal
-              const nom_parent = e.nom_complet;
-
               e.matching_etablissements.forEach(e2 => {
                 // Certains établissements secondaires ont une sorte de complément de nom
                 // On tente de lire la première ligne l'ajouter en complément du nom
@@ -105,10 +102,10 @@ function App() {
                 if (code2 != null && !duplicated && !(isClosed2 && ignoreClosedFilter)) {
                   tmp.push({
                     type: 'secondaire',
+                    code: code2,
+                    nom, // reprise du nom du parent car les établissements secondaires n'ont pas de nom propre
                     nom_extra: nom_extra ?? 'Etablissement secondaire',
 
-                    code: code2,
-                    nom: nom_parent,
                     date_fermeture: e2.date_fermeture,
 
                     adresse_ligne1: address_line1,
